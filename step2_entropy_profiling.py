@@ -81,14 +81,60 @@
 #     tile_counts = np.bincount(assigned_tiles)[1:] 
 #     for tile_id, count in enumerate(tile_counts):
 #         print(f"  - Virtual Tile {tile_id + 1}: {count} layers assigned")
-import numpy as np
 
-def step2_entropy_profiling(image_path, img_arr):
-    print("\n" + "=" * 80)
-    print("STEP 2: LIVE WORKLOAD ANALYSIS & SHANNON ENTROPY PROFILING")
-    print("=" * 80)
+
+
+
+
+# import numpy as np
+
+# def step2_entropy_profiling(image_path, img_arr):
+#     print("\n" + "=" * 80)
+#     print("STEP 2: LIVE WORKLOAD ANALYSIS & SHANNON ENTROPY PROFILING")
+#     print("=" * 80)
     
+#     hist, _ = np.histogram(img_arr.flatten(), bins=256, range=[0, 256], density=True)
+#     hist = hist[hist > 0]
+#     print(hist)
+#     entropy = -np.sum(hist * np.log2(hist))
+
+#     if entropy < 4.5:
+#         complexity_tier = "Low (Simple Background / Clean Subject)"
+#         target_bw = 4
+#     elif entropy < 6.5:
+#         complexity_tier = "Medium (Standard Real-World Scene)"
+#         target_bw = 6
+#     else:
+#         complexity_tier = "High (Complex Textures / High Occlusion)"
+#         target_bw = 8
+
+#     print(f"  -> Test Subject File         : [{image_path}]")
+#     print(f"  -> Measured Shannon Entropy  : {entropy:.3f} bits/pixel")
+#     print(f"  -> Visual Complexity Tier    : {complexity_tier}")
+#     print(f"  -> Assigned Target Bitwidth  : {target_bw}-bit Adaptive Precision")
+#     print("  -> Status: Workload successfully profiled for adaptive execution.\n")
+    
+#     return entropy, complexity_tier, target_bw
+
+# if __name__ == "__main__":
+#     from step1_model_prep import step1_model_preparation
+#     path, arr = step1_model_preparation()
+#     step2_entropy_profiling(path, arr)
+
+
+
+import os
+import numpy as np
+from PIL import Image
+
+def step2_entropy_profiling(image_path):
+    if not os.path.exists(image_path):
+        print(f"  [Error] Could not find '{image_path}'. Make sure it exists.")
+        return None, None, None
+
+    img_arr = np.array(Image.open(image_path).convert('L'))
     hist, _ = np.histogram(img_arr.flatten(), bins=256, range=[0, 256], density=True)
+    # print(hist)
     hist = hist[hist > 0]
     entropy = -np.sum(hist * np.log2(hist))
 
@@ -101,16 +147,24 @@ def step2_entropy_profiling(image_path, img_arr):
     else:
         complexity_tier = "High (Complex Textures / High Occlusion)"
         target_bw = 8
-
-    print(f"  -> Test Subject File         : [{image_path}]")
-    print(f"  -> Measured Shannon Entropy  : {entropy:.3f} bits/pixel")
-    print(f"  -> Visual Complexity Tier    : {complexity_tier}")
-    print(f"  -> Assigned Target Bitwidth  : {target_bw}-bit Adaptive Precision")
-    print("  -> Status: Workload successfully profiled for adaptive execution.\n")
     
     return entropy, complexity_tier, target_bw
 
 if __name__ == "__main__":
-    from step1_model_prep import step1_model_preparation
-    path, arr = step1_model_preparation()
-    step2_entropy_profiling(path, arr)
+    folder_name = "test_images"
+    try:
+        num_images = int(input(f"How many images do you want to profile for entropy? (e.g., 5): "))
+    except ValueError:
+        print("Please enter a valid number.")
+        exit()
+
+    print("\n" + "=" * 80)
+    print("STEP 2: BATCH SHANNON ENTROPY PROFILING")
+    print("=" * 80)
+
+    for i in range(1, num_images + 1):
+        img_path = os.path.join(folder_name, f"{i}.jpg")
+        ent, comp_tier, bw = step2_entropy_profiling(img_path)
+        
+        if ent is not None:
+            print(f"Image {i}.jpg | Entropy: {ent:.3f} | Tier: {comp_tier} | Target: {bw}-bit")
