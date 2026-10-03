@@ -48,3 +48,18 @@ The architecture is broken down into a 5-step modular pipeline:
 
 ### 1. Test Individual Local Images (In-House Testing)
 To analyze specific images and view how EARN-AI dynamically reacts to their individual complexities, run Step 4 directly.
+
+Prompt: The script will detect your test_images folder and ask how many images to evaluate individually.
+
+Output: Generates comprehensive tables and visual graphs for each processed image.
+
+## Large Dataset Batch Benchmark (Production/Cloud Testing)
+To benchmark a massive dataset (like a COCO subset) and simulate thermal throttling on edge devices, run Step 5.
+
+python step5_dataset_benchmark.py
+Prompt 1: Input the number of random samples to process (e.g., 1000).
+
+Prompt 2: Enter the simulated ambient temperature (e.g., 45°C for a standard hot edge device, or 65°C for extreme throttling).
+
+
+Output: Generates a unified, aggregated benchmark of the entire dataset.
